@@ -1,0 +1,65 @@
+﻿@page "/menuitems"
+@using BurgerGo.Domain
+@using BurgerGo.Data
+@using Microsoft.EntityFrameworkCore
+@implements IAsyncDisposable
+@inject IDbContextFactory<BurgerGoContext> DbFactory
+
+<PageTitle>Menu</PageTitle>
+
+<div class="menu-header">
+    <h1>BurgerGo Menu</h1>
+    <a href="/menuitems/create" class="btn btn-outline-primary">
+        + Create Menu Item
+    </a>
+</div>
+
+<div class="menu-grid">
+    @foreach (var item in context.MenuItem)
+    {
+        <div class="menu-card">
+            <img src="@item.ImageUrl"
+                 alt="@item.Name"
+                 class="menu-image" />
+
+            <div class="menu-info">
+                <h3>@item.Name</h3>
+                <p class="category">@item.Category</p>
+                <p class="price">$@item.Price</p>
+            </div>
+
+            <!-- ADD TO CART (LOCAL STATE ONLY) -->
+            <button class="add-btn" @onclick="() => AddToCart(item)">
+                Add to Cart
+            </button>
+        </div>
+    }
+</div>
+
+@if (cartCount > 0)
+{
+    <div class="cart-indicator">
+        🛒 @cartCount
+    </div>
+}
+
+@code {
+    private BurgerGoContext context = default!;
+    private int cartCount = 0;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    private void AddToCart(MenuItem item)
+    {
+        cartCount++;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await context.DisposeAsync();
+    }
+}
+
